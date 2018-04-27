@@ -11,4 +11,6 @@
     <string name="dealer">Dealer</string>
     <string name="button">Button</string>
     <string name="help">help</string>
+
+    <string name="interstitial_ad_unit_id">ca-app-pub-3940256099942544/1033173712</string>
 </resources>
