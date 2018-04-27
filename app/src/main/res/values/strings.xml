@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">BlackJack</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hit">hit</string>
+    <string name="endscards">endsCards</string>
+    <string name="stand">stand</string>
+    <string name="bet">Bet</string>
+    <string name="player">Player</string>
+    <string name="dealer">Dealer</string>
+    <string name="button">Button</string>
+    <string name="help">help</string>
+</resources>
