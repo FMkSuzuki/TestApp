@@ -142,7 +142,7 @@
         <!--android:id="@+id/dealerCS"-->
         <!--android:layout_width="287dp"-->
         <!--android:layout_height="25dp"-->
-        <!--android:text="@string/dealer"-->
+        <!--android:text="@string/dealerHand"-->
         <!--android:textAlignment="viewStart"-->
         <!--android:textSize="10sp"-->
         <!--app:layout_constraintBottom_toBottomOf="parent"-->

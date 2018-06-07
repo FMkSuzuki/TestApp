@@ -1,4 +1,4 @@
-package com.example.dell.blackjack
+package com.example.dell.blackjack.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.view.View
+import com.example.dell.blackjack.R
+import com.example.dell.blackjack.player
 import com.google.android.gms.ads.AdRequest
 import kotlinx.android.synthetic.main.activity_start.*
 import java.text.SimpleDateFormat
@@ -14,7 +16,7 @@ import java.util.*
 class StartMenu : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
-        val gameView = Intent(this,MainActivity::class.java)
+        val gameView = Intent(this, MainActivity::class.java)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_start)
@@ -40,7 +42,7 @@ class StartMenu : AppCompatActivity() {
         addChipView.setOnClickListener{}
         backToMenu.setOnClickListener {
             //チップ初期化
-            setChip(this.applicationContext,PLAYERMONEY,FIRSTCHIP)
+            player.setChip(this.applicationContext, player.PLAYERMONEY, player.FIRSTCHIP)
             backToMenu.visibility = View.GONE
             timerRunningView.visibility = View.VISIBLE
             addChipView.visibility = View.GONE
@@ -49,17 +51,17 @@ class StartMenu : AppCompatActivity() {
 
         //各BET
         start500Bet.setOnClickListener {
-            player.setBet(BET1)
+            player.setBet(player.BET1)
             finish()
             startActivity(gameView)
         }
         start1000Bet.setOnClickListener {
-            player.setBet(BET2)
+            player.setBet(player.BET2)
             finish()
             startActivity(gameView)
         }
         start5000Bet.setOnClickListener {
-            player.setBet(BET3)
+            player.setBet(player.BET3)
             finish()
             startActivity(gameView)
         }
@@ -76,22 +78,22 @@ class StartMenu : AppCompatActivity() {
         ////chipを1,000,000にする
         debagChipEq1M.setOnClickListener{
             //自身のチップデータの読みこみ
-            setChip(this.applicationContext,PLAYERMONEY,DEBAGMANYCHIP)
+            player.setChip(this.applicationContext, player.PLAYERMONEY, player.DEBAGMANYCHIP)
             startPrcs()
         }
         ////chipの格納されたプリファレンスを空にする
         debagChipClear.setOnClickListener{
-            val chip = loadChip(this.applicationContext,PLAYERMONEY)
+            val chip = player.loadChip(this.applicationContext, player.PLAYERMONEY)
             if(chip != -1){
-                removePref(this.applicationContext,PLAYERMONEY)
+                player.removePref(this.applicationContext, player.PLAYERMONEY)
             }
             startPrcs()
         }
         ////チップを0にする
         debagChipEq0.setOnClickListener{
-            val chip = loadChip(this.applicationContext,PLAYERMONEY)
+            val chip = player.loadChip(this.applicationContext, player.PLAYERMONEY)
             if(chip != -1){
-                setChip(this.applicationContext,PLAYERMONEY,0)
+                player.setChip(this.applicationContext, player.PLAYERMONEY,0)
             }
             startPrcs()
         }
@@ -129,38 +131,38 @@ class StartMenu : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun startPrcs(){
         //自身のチップデータの読みこみ
-        var chip = loadChip(this.applicationContext,PLAYERMONEY)
+        var chip = player.loadChip(this.applicationContext, player.PLAYERMONEY)
 
         //プリファレンスがないときは初期値を入れる
         if(chip == -1){
-            setChip(this.applicationContext,PLAYERMONEY,FIRSTCHIP)
-            chip = loadChip(this.applicationContext, PLAYERMONEY)
+            player.setChip(this.applicationContext, player.PLAYERMONEY, player.FIRSTCHIP)
+            chip = player.loadChip(this.applicationContext, player.PLAYERMONEY)
         }
 
         //チップ所持数で掛けられるBETの処理
-        start500Bet.isEnabled = chip >= BET1
-        start1000Bet.isEnabled = chip >= BET2*10
-        start5000Bet.isEnabled = chip >= BET3*10
+        start500Bet.isEnabled = chip >= player.BET1
+        start1000Bet.isEnabled = chip >= player.BET2*10
+        start5000Bet.isEnabled = chip >= player.BET3*10
 
         //各BETが掛けられないときの処理
         if(!start500Bet.isEnabled){
-            start500Bet.text = "chipOver\n$BET1"
+            start500Bet.text = "chipOver\n${player.BET1}"
             //チップ追加処理
             addChipView.visibility = View.VISIBLE
             //タイマー開始
             handler.post(runnable)
         }else{
-            start500Bet.text = "$BET1"
+            start500Bet.text = "${player.BET1}"
         }
         if(!start1000Bet.isEnabled){
-            start1000Bet.text = "chipOver\n${BET2*10}"
+            start1000Bet.text = "chipOver\n${player.BET2*10}"
         }else{
-            start1000Bet.text = "$BET2"
+            start1000Bet.text = "${player.BET2}"
         }
         if(!start5000Bet.isEnabled){
-            start5000Bet.text = "chipOver\n${BET3*10}"
+            start5000Bet.text = "chipOver\n${player.BET3*10}"
         }else{
-            start5000Bet.text = "$BET3"
+            start5000Bet.text = "${player.BET3}"
         }
 
         //画面に表示

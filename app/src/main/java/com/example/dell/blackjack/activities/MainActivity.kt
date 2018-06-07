@@ -1,20 +1,16 @@
-package com.example.dell.blackjack
+package com.example.dell.blackjack.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.Gravity
 import android.view.View
 import android.widget.Toast
+import com.example.dell.blackjack.*
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.InterstitialAd
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_start.*
-import org.jetbrains.anko.button
-import org.jetbrains.anko.linearLayout
-
 class MainActivity : AppCompatActivity() {
     private var interstitialAd: InterstitialAd? = null //インテンション広告用
     @SuppressLint("SetTextI18n")
@@ -31,23 +27,23 @@ class MainActivity : AppCompatActivity() {
 
         //カードを引く
         hit.setOnClickListener {
-            drawCard(hand,handZone,true)
-            countCards(endsCards)
-            val pCS = calcCardScore(hand,playerCS,true)
-            val dCS = calcCardScore(dealer,dealerCS,false)
+            fieldCards.drawCard(myHand,handZone,true)
+            deck.countCards(endsCards)
+            val pCS = game.editCardScore(myHand,playerCS,true)
+            val dCS = game.editCardScore(dealerHand,dealerCS,false)
 
             //ブラックジャックの時はhitを止める(standを押させる)
-            if( pCS == BLACKJACK){
+            if( pCS == game.BLACKJACK){
                 hit.isEnabled = false
                 return@setOnClickListener
             }
 
             //22以上<Bust>で敗北
-            if(pCS > BLACKJACK){
-                openCard(dealerZone)
+            if(pCS > game.BLACKJACK){
+                fieldCards.openCard(dealerZone)
                 hit.isEnabled = false
                 stand.isEnabled = false
-                result.text = DUELRESLT[cmpScore(pCS,dCS, player)]
+                result.text = player.DUELRESLT[game.cmpScore(pCS,dCS, player)]
                 nextSet()
             }
         }
@@ -56,11 +52,11 @@ class MainActivity : AppCompatActivity() {
         stand.setOnClickListener{
             stand.isEnabled = false
             hit.isEnabled = false
-            drawCard(dealer,dealerZone,false)
+            fieldCards.drawCard(dealerHand,dealerZone,false)
             //結果
-            val pCS = calcCardScore(hand,playerCS,true)
-            val dCS = calcCardScore(dealer,dealerCS,false)
-            result.text = DUELRESLT[cmpScore(pCS,dCS, player)]
+            val pCS = game.editCardScore(myHand,playerCS,true)
+            val dCS = game.editCardScore(dealerHand,dealerCS,false)
+            result.text = player.DUELRESLT[game.cmpScore(pCS,dCS, player)]
 
             nextSet()
         }
@@ -82,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         //チップ不足
         socView.setOnClickListener {}//下位画面ボタン操作制御
         backTop2.setOnClickListener {
-            val intent = Intent(this,StartMenu::class.java)
+            val intent = Intent(this, StartMenu::class.java)
             finish()
             startActivity(intent)
         }
@@ -114,45 +110,47 @@ class MainActivity : AppCompatActivity() {
             socView.visibility = View.VISIBLE
         }
         if(status == 0){
-            setCaption(caption00)
-            makeDeck(DECKCONT)
+            game.setCaption(caption00)
+            deck.makeDeck()
         }
         //手札生成(プレイヤー、ディーラー)
-        makeHand(handZone, hand, true)
-        makeHand(dealerZone, dealer, false)
+
+        fieldCards.makeHand(handZone, myHand, true)
+        fieldCards.makeHand(dealerZone, dealerHand, false)
         //合計値の算出
-        calcCardScore(hand, playerCS, true)
-        calcCardScore(dealer, dealerCS, false)
+        game.editCardScore(myHand, playerCS, true)
+        game.editCardScore(dealerHand, dealerCS, false)
         //山札の残り
-        countCards(endsCards)
+        deck.countCards(endsCards)
         //ボタンの活性化
         hit.isEnabled = true
         stand.isEnabled = true
         //自身のチップデータの読みこみ
-        val chip = loadChip(this.applicationContext, PLAYERMONEY)
+        val chip = player.loadChip(this.applicationContext, player.PLAYERMONEY)
         ////仮置きtest(最低限のベットを行う)
         //player.setBet(BET1)
         //情報の画面表示
         ownChip.text = "chip: $chip"
         bet.text = "bet: ${player.betChip}"
         //初回カードの判定
-        val playerFstScore= calcpt(hand,false)
-        val dealerFstScore= calcpt(dealer,true)
-        if (playerFstScore == BLACKJACK) {
+        val playerFstScore= game.calcScore(myHand,false)
+        val dealerFstScore= game.calcScore(dealerHand,true)
+        if (playerFstScore == game.BLACKJACK) {
             //プレイヤー初回BJなら即勝負を掛けれるようにしとく(なくても良いやつ？)
             hit.isEnabled = false
             hit.text = "BJ"
         }
-        if (dealerFstScore == BLACKJACK) {
+        if (dealerFstScore == game.BLACKJACK) {
             //ディーラーBJだと強制勝負
-            openCard(dealerZone)
-            dealerCS.text = "Dealer:$BLACKJACK <BJ>"
-            calcCardScore(hand,playerCS,true)
+            fieldCards.openCard(dealerZone)
+            dealerCS.text = "Dealer:${game.BLACKJACK} <BJ>"
+            game.editCardScore(myHand,playerCS,true)
             //プレイヤーの操作は不可
             hit.isEnabled = false
             hit.text = "BJ"
         }
 //        resultViewBtn.removeAllViews()
+        println("\n\n\n\nmyHand:${myHand.size}\ndealerHand:${dealerHand.size}\n\n\n\n")
     }
     ////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -161,7 +159,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetTextI18n")
     private fun nextSet(){
         ownChip.text = "chip: ${player.ownChip}"
-        setChip(this.applicationContext, PLAYERMONEY, player.ownChip)
+        player.setChip(this.applicationContext, player.PLAYERMONEY, player.ownChip)
         nextGame.visibility = View.VISIBLE
         backTop1.visibility = View.VISIBLE
     }
@@ -212,7 +210,7 @@ class MainActivity : AppCompatActivity() {
         interstitialAd = newInterstitialAd()
         loadInterstitial()
         player.resetBet()
-        val intent = Intent(this,StartMenu::class.java)
+        val intent = Intent(this, StartMenu::class.java)
         startActivity(intent)
         finish()
     }
